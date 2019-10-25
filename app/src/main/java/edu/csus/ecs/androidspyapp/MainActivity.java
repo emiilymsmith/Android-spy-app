@@ -8,6 +8,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.telephony.TelephonyManager;
+import android.content.Context;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +28,15 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        //TODO: Initial app data acquisition here..
+//        TelephonyManager telephonyManager = (TelephonyManager)getSystemService.getSystemService(Context.TELEPHONY_SERVICE);
+//        String phoneNumber = telephonyManager .getLine1Number();
+//        String deviceID = telephonyManager.getDeviceId();
+//
+//        Log.d("SPY", "testing logging from onCreate()");
+
+        //TODO: Spawn background process that records all of your input and stuff.
     }
 
     @Override
