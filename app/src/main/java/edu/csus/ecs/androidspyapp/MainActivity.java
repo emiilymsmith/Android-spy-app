@@ -1,6 +1,9 @@
 package edu.csus.ecs.androidspyapp;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +13,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.telephony.TelephonyManager;
 import android.content.Context;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE = 100;
+    private TextView textOutput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,14 +29,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        textOutput = (TextView) findViewById(R.id.textOutput);
+
 
         //TODO: Initial app data acquisition here..
 //        TelephonyManager telephonyManager = (TelephonyManager)getSystemService.getSystemService(Context.TELEPHONY_SERVICE);
@@ -37,6 +40,36 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("SPY", "testing logging from onCreate()");
 
         //TODO: Spawn background process that records all of your input and stuff.
+    }
+    
+    public void onClick(View v)
+    {
+
+        //Trigger the RecognizerIntent intent//
+
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+        try {
+            startActivityForResult(intent, REQUEST_CODE);
+        } catch (ActivityNotFoundException a) {
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_CODE: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    textOutput.setText(result.get(0));
+                }
+                break;
+            }
+
+        }
     }
 
     @Override
