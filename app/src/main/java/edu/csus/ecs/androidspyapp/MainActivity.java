@@ -1,93 +1,226 @@
 package edu.csus.ecs.androidspyapp;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
+import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.telephony.TelephonyManager;
-import android.content.Context;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.vikramezhil.droidspeech.DroidSpeech;
+import com.vikramezhil.droidspeech.OnDSListener;
+import com.vikramezhil.droidspeech.OnDSPermissionsListener;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+import java.util.Random;
 
-    private static final int REQUEST_CODE = 100;
-    private TextView textOutput;
+/**
+ * Droid Speech Example Activity
+ *
+ * @author Vikram Ezhil
+ */
+
+public class MainActivity extends Activity implements OnClickListener, OnDSListener, OnDSPermissionsListener
+{
+    public final String TAG = "MainActivity";
+
+    private DroidSpeech droidSpeech;
+    private TextView finalSpeechResult;
+    private ImageView start, stop;
+
+    // MARK: Activity Methods
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        // TODO: display the test output
-        // TODO: fix the spawning issue
-        textOutput = (TextView) findViewById(R.id.textOutput);
+        // Setting the layout;[.
+        setContentView(R.layout.activity_droid_speech);
 
+        // Initializing the droid speech and setting the listener
+        droidSpeech = new DroidSpeech(this, getFragmentManager());
+        droidSpeech.setOnDroidSpeechListener(this);
+        droidSpeech.setShowRecognitionProgressView(true);
+        droidSpeech.setOneStepResultVerify(true);
+        droidSpeech.setRecognitionProgressMsgColor(Color.WHITE);
+        droidSpeech.setOneStepVerifyConfirmTextColor(Color.WHITE);
+        droidSpeech.setOneStepVerifyRetryTextColor(Color.WHITE);
 
-//        Log.d("SPY", "testing logging from onCreate()");
+        finalSpeechResult = findViewById(R.id.finalSpeechResult);
 
-        //TODO: Spawn background process that records all of your input and stuff.
+        start = findViewById(R.id.start);
+        start.setOnClickListener(this);
+
+        stop = findViewById(R.id.stop);
+        stop.setOnClickListener(this);
     }
 
-    public void onClick(View v)
+    @Override
+    protected void onPause()
     {
+        super.onPause();
 
-        //Trigger the RecognizerIntent intent
-
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-
-        try {
-            startActivityForResult(intent, REQUEST_CODE);
-        } catch (ActivityNotFoundException a) {
-
+        if(stop.getVisibility() == View.VISIBLE)
+        {
+            stop.performClick();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onDestroy()
+    {
+        super.onDestroy();
 
-        switch (requestCode) {
-            case REQUEST_CODE: {
-                if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    textOutput.setText(result.get(0));
-                }
+        if(stop.getVisibility() == View.VISIBLE)
+        {
+            stop.performClick();
+        }
+    }
+
+    // MARK: OnClickListener Method
+
+    @Override
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+            case R.id.start:
+
+                // Starting droid speech
+                droidSpeech.startDroidSpeechRecognition();
+
+                // Setting the view visibilities when droid speech is running
+                start.setVisibility(View.GONE);
+                stop.setVisibility(View.VISIBLE);
+
                 break;
+
+            case R.id.stop:
+
+                // Closing droid speech
+                droidSpeech.closeDroidSpeechOperations();
+
+                stop.setVisibility(View.GONE);
+                start.setVisibility(View.VISIBLE);
+
+                break;
+        }
+    }
+
+    // MARK: DroidSpeechListener Methods
+
+    @Override
+    public void onDroidSpeechSupportedLanguages(String currentSpeechLanguage, List<String> supportedSpeechLanguages)
+    {
+        Log.i(TAG, "Current speech language = " + currentSpeechLanguage);
+        Log.i(TAG, "Supported speech languages = " + supportedSpeechLanguages.toString());
+
+        if(supportedSpeechLanguages.contains("ta-IN"))
+        {
+            // Setting the droid speech preferred language as tamil if found
+            droidSpeech.setPreferredLanguage("ta-IN");
+
+            // Setting the confirm and retry text in tamil
+            droidSpeech.setOneStepVerifyConfirmText("உறுதிப்படுத்த");
+            droidSpeech.setOneStepVerifyRetryText("மீண்டும் முயற்சிக்க");
+        }
+    }
+
+    @Override
+    public void onDroidSpeechRmsChanged(float rmsChangedValue)
+    {
+        // Log.i(TAG, "Rms change value = " + rmsChangedValue);
+    }
+
+    @Override
+    public void onDroidSpeechLiveResult(String liveSpeechResult)
+    {
+        Log.i(TAG, "Live speech result = " + liveSpeechResult);
+    }
+
+    @Override
+    public void onDroidSpeechFinalResult(String finalSpeechResult)
+    {
+        // Setting the final speech result
+        this.finalSpeechResult.setText(finalSpeechResult);
+
+        if(droidSpeech.getContinuousSpeechRecognition())
+        {
+            int[] colorPallets1 = new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.CYAN, Color.MAGENTA};
+            int[] colorPallets2 = new int[] {Color.YELLOW, Color.RED, Color.CYAN, Color.BLUE, Color.GREEN};
+
+            // Setting random color pallets to the recognition progress view
+            droidSpeech.setRecognitionProgressViewColors(new Random().nextInt(2) == 0 ? colorPallets1 : colorPallets2);
+        }
+        else
+        {
+            stop.setVisibility(View.GONE);
+            start.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onDroidSpeechClosedByUser()
+    {
+        stop.setVisibility(View.GONE);
+        start.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onDroidSpeechError(String errorMsg)
+    {
+        // Speech error
+        Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+
+        stop.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                // Stop listening
+                stop.performClick();
+            }
+        });
+    }
+
+    // MARK: DroidSpeechPermissionsListener Method
+
+    @Override
+    public void onDroidSpeechAudioPermissionStatus(boolean audioPermissionGiven, String errorMsgIfAny)
+    {
+        if(audioPermissionGiven)
+        {
+            start.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Start listening
+                    start.performClick();
+                }
+            });
+        }
+        else
+        {
+            if(errorMsgIfAny != null)
+            {
+                // Permissions error
+                Toast.makeText(this, errorMsgIfAny, Toast.LENGTH_LONG).show();
             }
 
+            stop.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Stop listening
+                    stop.performClick();
+                }
+            });
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">AndroidSpyApp</string>
     <string name="action_settings">Settings</string>
+    <string name="final_speech_result">Final Speech Result:</string>
+    <string name="no_data">---</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
 </resources>
