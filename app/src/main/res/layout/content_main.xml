@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="58dp"
         android:background="#FF0000"
-        android:text="Start dictation"
+        android:text="Start Listening"
         android:textColor="#ffffff"
         android:onClick="onClick"
         android:layout_marginStart="8dp"

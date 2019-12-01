@@ -29,23 +29,20 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // TODO: display the test output
+        // TODO: fix the spawning issue
         textOutput = (TextView) findViewById(R.id.textOutput);
 
 
-        //TODO: Initial app data acquisition here..
-//        TelephonyManager telephonyManager = (TelephonyManager)getSystemService.getSystemService(Context.TELEPHONY_SERVICE);
-//        String phoneNumber = telephonyManager .getLine1Number();
-//        String deviceID = telephonyManager.getDeviceId();
-//
 //        Log.d("SPY", "testing logging from onCreate()");
 
         //TODO: Spawn background process that records all of your input and stuff.
     }
-    
+
     public void onClick(View v)
     {
 
-        //Trigger the RecognizerIntent intent//
+        //Trigger the RecognizerIntent intent
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
