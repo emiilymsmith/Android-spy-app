@@ -119,14 +119,14 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         Log.i(TAG, "Current speech language = " + currentSpeechLanguage);
         Log.i(TAG, "Supported speech languages = " + supportedSpeechLanguages.toString());
 
-        if(supportedSpeechLanguages.contains("ta-IN"))
+        if(supportedSpeechLanguages.contains("en-US"))
         {
-            // Setting the droid speech preferred language as tamil if found
-            droidSpeech.setPreferredLanguage("ta-IN");
+            // Setting the droid speech preferred language as english if found
+            droidSpeech.setPreferredLanguage("en-US");
 
             // Setting the confirm and retry text in tamil
-            droidSpeech.setOneStepVerifyConfirmText("உறுதிப்படுத்த");
-            droidSpeech.setOneStepVerifyRetryText("மீண்டும் முயற்சிக்க");
+            droidSpeech.setOneStepVerifyConfirmText("Confirm");
+            droidSpeech.setOneStepVerifyRetryText("Try Again");
         }
     }
 
