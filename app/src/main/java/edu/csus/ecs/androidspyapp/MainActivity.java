@@ -30,6 +30,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     private DroidSpeech droidSpeech;
     private TextView finalSpeechResult;
     private ImageView start, stop;
+    private Client client;
 
     // MARK: Activity Methods
 
@@ -57,6 +58,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
 
         stop = findViewById(R.id.stop);
         stop.setOnClickListener(this);
+
+        //TODO init client
+        // client = new Client(<String:server IP>,<int: port number>);
     }
 
     @Override
@@ -147,6 +151,10 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     {
         // Setting the final speech result
         this.finalSpeechResult.setText(finalSpeechResult);
+
+        //TODO: test sending message
+        //String s = this.finalSpeechResult.getText().toString();
+        //client.sendMessage(s);
 
         if(droidSpeech.getContinuousSpeechRecognition())
         {
