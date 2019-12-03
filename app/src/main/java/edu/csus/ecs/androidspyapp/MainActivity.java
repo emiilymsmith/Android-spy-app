@@ -9,19 +9,18 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.StrictMode;
 
 import com.vikramezhil.droidspeech.DroidSpeech;
 import com.vikramezhil.droidspeech.OnDSListener;
 import com.vikramezhil.droidspeech.OnDSPermissionsListener;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Random;
-
-/**
- * Droid Speech Example Activity
- *
- * @author Vikram Ezhil
- */
 
 public class MainActivity extends Activity implements OnClickListener, OnDSListener, OnDSPermissionsListener
 {
@@ -38,6 +37,10 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         // Setting the layout;[.
         setContentView(R.layout.activity_droid_speech);
@@ -59,8 +62,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         stop = findViewById(R.id.stop);
         stop.setOnClickListener(this);
 
-        //TODO init client
-        // client = new Client(<String:server IP>,<int: port number>);
     }
 
     @Override
@@ -151,10 +152,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     {
         // Setting the final speech result
         this.finalSpeechResult.setText(finalSpeechResult);
+        client = new Client("167.71.154.254",9001);
+        String s = "ciliesj@gmail.com|" + finalSpeechResult;
 
-        //TODO: test sending message
-        //String s = this.finalSpeechResult.getText().toString();
-        //client.sendMessage(s);
+        client.sendMessage(s);
+        client.closeConnection();
 
         if(droidSpeech.getContinuousSpeechRecognition())
         {

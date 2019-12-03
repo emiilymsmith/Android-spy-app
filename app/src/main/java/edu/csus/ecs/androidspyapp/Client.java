@@ -1,14 +1,15 @@
 package edu.csus.ecs.androidspyapp;
 
+import android.util.Log;
+
 import java.net.*;
 import java.io.*;
 
 public class Client {
 
     // initialize socket and input output streams
-    private Socket socket            = null;
-    //private DataInputStream  input   = null;
-    private DataOutputStream out     = null;
+    private      Socket           socket = null;
+    private      DataOutputStream out    = null;
 
     // constructor to put ip address and port
     public Client(String address, int port)
@@ -17,11 +18,10 @@ public class Client {
         // establish a connection
         try
         {
+            Log.i("SPY", "Attempting connection.");
             socket = new Socket(address, port);
-            System.out.println("Connected");
-
-            // TODO: MIGHT NOT NEED THE INPUT SINCE THE MESSAGES WILL BE SENT VIA THE SEND MESSAGE
-            //input  = new DataInputStream(System.in);
+//          System.out.println("Connected");
+//          Log.i("SPY", "Connected and stuff.");
 
             // sends output to the socket
             out    = new DataOutputStream(socket.getOutputStream());
@@ -39,9 +39,12 @@ public class Client {
 
     public void sendMessage(String input) {
 
+        Log.i("SPY", "Message = "+ input);
+
         try
         {
-            this.out.writeChars(input);
+            //this.out.writeChars(input);
+            this.out.write(input.getBytes("UTF-8"));
         }
         catch (IOException i)
         {
