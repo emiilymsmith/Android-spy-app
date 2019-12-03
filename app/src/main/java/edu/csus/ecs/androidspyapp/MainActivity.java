@@ -1,5 +1,20 @@
 package edu.csus.ecs.androidspyapp;
 
+import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
+import android.util.Patterns;
+import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.AccountPicker;
+import java.util.regex.Pattern;
+
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -24,12 +39,19 @@ import java.util.Random;
 
 public class MainActivity extends Activity implements OnClickListener, OnDSListener, OnDSPermissionsListener
 {
-    public final String TAG = "MainActivity";
+
+    private String TAG = "SPY";
+    String[] permissions = {"android.permission.GET_ACCOUNTS"};
+    private String wantAccountsPermission = Manifest.permission.GET_ACCOUNTS;
 
     private DroidSpeech droidSpeech;
     private TextView finalSpeechResult;
     private ImageView start, stop;
     private Client client;
+
+    private String userEmail = "";
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
 
     // MARK: Activity Methods
 
@@ -44,6 +66,20 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
 
         // Setting the layout;[.
         setContentView(R.layout.activity_droid_speech);
+
+        if (!checkPermission(wantAccountsPermission))
+        {
+            requestPermission(wantAccountsPermission);
+        }
+        else
+        {
+            getEmails();
+        }
+
+        Intent googlePicker = AccountPicker
+                .newChooseAccountIntent(null, null, new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE},
+                        true, null, null, null, null);
+        startActivityForResult(googlePicker, PERMISSION_REQUEST_CODE);
 
         // Initializing the droid speech and setting the listener
         droidSpeech = new DroidSpeech(this, getFragmentManager());
@@ -62,6 +98,75 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         stop = findViewById(R.id.stop);
         stop.setOnClickListener(this);
 
+    }
+
+    private void getEmails()
+    {
+        Pattern emailPattern = Patterns.EMAIL_ADDRESS;
+
+        // Getting all registered Google Accounts;
+        // Account[] accounts = AccountManager.get(this).getAccountsByType("com.google");
+
+        // Getting all registered Accounts;
+        Account[] accounts = AccountManager.get(this).getAccounts();
+
+        for (Account account : accounts)
+        {
+            if (emailPattern.matcher(account.name).matches())
+            {
+                Log.i(TAG, String.format("YOU ARE %s - %s", account.name, account.type));
+                userEmail = account.name;
+            }
+        }
+    }
+
+    private boolean checkPermission(String permission)
+    {
+        if (Build.VERSION.SDK_INT >= 23) {
+            int result = ContextCompat.checkSelfPermission(this, permission);
+            if (result == PackageManager.PERMISSION_GRANTED)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    private void requestPermission(String permission)
+    {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+        {
+            Toast.makeText(this, "Get account permission allows us to get your email",
+                    Toast.LENGTH_LONG).show();
+        }
+        ActivityCompat.requestPermissions(this, new String[]{permission}, PERMISSION_REQUEST_CODE);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        switch (requestCode)
+        {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    getEmails();
+                }
+                else
+                {
+                    Toast.makeText(this, "Permission Denied.",
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
     }
 
     @Override
