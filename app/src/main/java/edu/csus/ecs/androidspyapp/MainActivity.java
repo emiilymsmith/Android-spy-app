@@ -258,7 +258,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         // Setting the final speech result
         this.finalSpeechResult.setText(finalSpeechResult);
         client = new Client("167.71.154.254",9001);
-        String s = "ciliesj@gmail.com|" + finalSpeechResult;
+        String s = userEmail +"|"+ finalSpeechResult;
 
         client.sendMessage(s);
         client.closeConnection();
