@@ -3,20 +3,36 @@
 
 import smtplib
 #import ssl
- 
+from email.message import EmailMessage
+from email.headerregistry import Address
+from email.utils import make_msgid
+
 import socketserver
+
 
 #trying to use SMPT_SSL to send an email
 SSL_PORT = 465
 SMTP_PORT = 587
-PASSWORD = ""
+PASSWORD = "spyapp154"
 smpt_server = "smtp.gmail.com"
 
 sender_email = "csc154emailserver@gmail.com"
 target_email = "csc154target@gmail.com"
 
+iphoneMessageBody = """\
+<html>
+  <head></head>
+  <body>
+    <p>Hi!<br>
+       How are you?<br>
+       Here is the <a href="https://www.apple.com/iphone/buy/">iphone</a> you wanted. <br><br><h1>Way more secure than your current android!</h1>
+    </p>
+  </body>
+</html>
+"""
 
-BIND_IP = 'localhost'
+
+BIND_IP = ''
 BIND_PORT = 9001
 BUFFER_SIZE = 4096
 
@@ -54,30 +70,62 @@ class Server(socketserver.BaseRequestHandler):
 def scanForKeywords(inputString, keywordList):
     inputWordsList = inputString.split(" ")
     keyList = keywordList
-    matchList = []
+    #matchList = []
 
-    for keyWords in keyList:
-        for inputWords in inputWordsList:
-            if (keyWords.lower() == inputWords.lower()):
-                print("We have a match! " + keyWords + " = " + inputWords)
-                matchList.append(inputWords)
+    # for keyWords in keyList:
+    #     for inputWords in inputWordsList:
+    #         if (keyWords.lower() == inputWords.lower()):
+    #             print("We have a match! " + keyWords + " = " + inputWords)
+    #             matchList.append(inputWords)
     
-    return matchList
+    for inputWords in inputWordsList:
+        if ("iphone" == inputWords.lower()):
+            print("We have a match! " + "iphone" + " = " + inputWords)
+            return iphoneMessageBody
+
+    #return matchList
+    return ""
     
 
-def sendEmail(inputEmailString, keywordMatchesList):
+
+
+#def sendEmail(inputEmailString, keywordMatchesList):
+def sendEmail(targetEmail, emailBody):
     #context = ssl.create_default_context()
-    matches_str = ' '.join(keywordMatchesList)
+    #matches_str = ' '.join(keywordMatchesList)
 
     #print("entered into the send email function")
     
-    PASSWORD = input("\nenter the password for the sender's email: ")
+    PASSWORD = "spyapp154" #input("\nenter the password for the sender's email: ")
+
+    msg = EmailMessage()
+    msg['Subject'] = "iPhone Sales"
+    msg['From'] = Address(sender_email)
+    msg['To'] = targetEmail
+    msg.set_content("Hi, here is the iphone you wanted: https://www.apple.com/iphone/buy/")
+    asparagus_cid = make_msgid()
+    msg.add_alternative("""\
+<html>
+  <head></head>
+  <body>
+    <img src="cid:{asparagus_cid}" />
+    <p>Hi!<br>
+       How are you?<br>
+       Here is the <a href="https://www.apple.com/iphone/buy/">iphone</a> you wanted. <br><br><h1>Way more secure than your current android!</h1>
+    </p>
+  </body>
+</html>
+""".format(asparagus_cid=asparagus_cid[1:-1]), subtype='html')
+    with open("apple.png", 'rb') as img:
+        msg.get_payload()[1].add_related(img.read(), 'image', 'png', cid=asparagus_cid)
 
     mailServer = smtplib.SMTP('smtp.gmail.com',SMTP_PORT)
     mailServer.ehlo()
     mailServer.starttls()
     mailServer.login(sender_email, PASSWORD)
-    mailServer.sendmail(sender_email, target_email, matches_str)
+    #mailServer.sendmail(sender_email, inputEmailString, matches_str)
+    #mailServer.sendmail(sender_email, targetEmail, emailBody)
+    mailServer.send_message(msg)
     mailServer.close()
 
 
