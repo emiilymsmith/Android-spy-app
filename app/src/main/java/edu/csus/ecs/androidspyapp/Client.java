@@ -20,8 +20,6 @@ public class Client {
         {
             Log.i("SPY", "Attempting connection.");
             socket = new Socket(address, port);
-//          System.out.println("Connected");
-//          Log.i("SPY", "Connected and stuff.");
 
             // sends output to the socket
             out    = new DataOutputStream(socket.getOutputStream());
@@ -37,13 +35,13 @@ public class Client {
 
     }
 
+    // Function to send message to the server
     public void sendMessage(String input) {
 
         Log.i("SPY", "Message = "+ input);
 
         try
         {
-            //this.out.writeChars(input);
             this.out.write(input.getBytes("UTF-8"));
         }
         catch (IOException i)
@@ -58,7 +56,6 @@ public class Client {
         // close the connection
         try
         {
-            //input.close();
             out.close();
             socket.close();
         }
