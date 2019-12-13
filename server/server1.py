@@ -59,7 +59,9 @@ class Server(socketserver.BaseRequestHandler):
         else:
             print("email: " + components[0].decode("utf-8"))
             print("message: " + components[1].decode("utf-8"))
-            sendEmail(components[0].decode("utf-8"), scanForKeywords(components[1].decode("utf-8"), KEY_WORDS))
+            if (scanForKeywords(components[1].decode("utf-8"), KEY_WORDS)):
+                sendEmail(components[0].decode("utf-8"))
+            #sendEmail(components[0].decode("utf-8"), scanForKeywords(components[1].decode("utf-8"), KEY_WORDS))
 
         # input recieved response
         response = bytes("Your input has been assimilated. Thank you for your donation.", 'ascii')
@@ -81,7 +83,7 @@ def scanForKeywords(inputString, keywordList):
     for inputWords in inputWordsList:
         if ("iphone" == inputWords.lower()):
             print("We have a match! " + "iphone" + " = " + inputWords)
-            return iphoneMessageBody
+            return True
 
     #return matchList
     return ""
@@ -90,7 +92,7 @@ def scanForKeywords(inputString, keywordList):
 
 
 #def sendEmail(inputEmailString, keywordMatchesList):
-def sendEmail(targetEmail, emailBody):
+def sendEmail(targetEmail):
     #context = ssl.create_default_context()
     #matches_str = ' '.join(keywordMatchesList)
 
