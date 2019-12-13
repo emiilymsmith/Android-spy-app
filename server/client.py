@@ -1,3 +1,6 @@
+
+#Simple script to test the python server.
+
 import socket
 import sys
 

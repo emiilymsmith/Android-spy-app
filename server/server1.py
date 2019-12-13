@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 import smtplib
 #import ssl
 from email.message import EmailMessage
@@ -13,7 +12,7 @@ import socketserver
 #trying to use SMPT_SSL to send an email
 SSL_PORT = 465
 SMTP_PORT = 587
-PASSWORD = "spyapp154"
+PASSWORD = "spyapp154" #CHANGE THIS TO YOUR EMAIL.
 smpt_server = "smtp.gmail.com"
 
 sender_email = "csc154emailserver@gmail.com"
@@ -74,6 +73,7 @@ def scanForKeywords(inputString, keywordList):
     keyList = keywordList
     #matchList = []
 
+    #DEMO: Only do iphone.
     # for keyWords in keyList:
     #     for inputWords in inputWordsList:
     #         if (keyWords.lower() == inputWords.lower()):
@@ -98,7 +98,7 @@ def sendEmail(targetEmail):
 
     #print("entered into the send email function")
     
-    PASSWORD = "spyapp154" #input("\nenter the password for the sender's email: ")
+    PASSWORD = "enter your password here" #input("\nenter the password for the sender's email: ")
 
     msg = EmailMessage()
     msg['Subject'] = "iPhone Sales"
